@@ -1,0 +1,51 @@
+services:
+  api:
+    build:
+      context: ./api
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./api:/usr/src/app
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: 123456
+      DB_NAME: banco
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    env_file:
+      - .env
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3307:3307"
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: banco
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./sql-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+
+volumes:
+  db_data:
+
+networks:
+  app-network:
